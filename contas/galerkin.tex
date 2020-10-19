@@ -1,0 +1,24 @@
+Draft:
+
+
+
+Integrating  $\V$ by  parts:
+\begin{equation}
+  -\zint{ \dpartial{z}  \V  \dpartial{z}P_i(\tilde{z})} + \zint{ \dfrac{q d^2}{\epsilon}(\Np-\Nm) P_i(\tilde{z}) } + V(1) P_i(1) - V(-1) P_i(-1) =0
+\end{equation}
+
+$P_i(\pm 1)=(\pm 1)^i$
+
+\begin{align}
+  -\zint{  \sum_{j=0}^{N} \dfrac{c^j_v(t)}{\gamma_j} \dpartial{\tilde{z}} P_j(\tilde{z}) \dpartial{\tilde{z}} P_i(\tilde{z})} +\zint{ \dfrac{q d^2}{\epsilon} \sum_{j=0}^{N} \gamma_j^{-1}[c^j_{+}(t)  - c^j_{-}(t)] P_j(\tilde{z}) P_i(\tilde{z}) }\\
+  +  \dfrac{V_0}{2} \text{exp}(I \omega t) + (-1)^i \dfrac{V_0}{2} \text{exp}(I \omega t)  =0
+\end{align}
+
+\begin{align}\nonumber
+  \dpartial{\tilde{z}} P_i=\sum_{\substack{k=0 \\  k+n \; \text{even}}}^{i-1} (2k+1) P_k(\tilde{z})\\
+\end{align}
+
+\begin{align}\nonumber
+  \zint{  \sum_{j=0}^{N} \dfrac{c^j_v(t)}{\gamma_j} \dpartial{\tilde{z}} P_j(\tilde{z}) \dpartial{\tilde{z}} P_i(\tilde{z})}&=\zint{  \sum_{j=0}^{N} \sum^{j-1}_{\substack{k=0 \\  k+j \; \text{even}}} \sum^{i-1}_{\substack{l=0 \\  l+i \; \text{even}}}\dfrac{c^j_v(t)}{\gamma_j}  (2k+1)(2l+1)P_k(\tilde{z})  P_l(\tilde{z})}\\
+   &=\sum_{j=0}^{N} \sum^{j-1}_{\substack{k=0 \\  k+j \; \text{even}}} \sum^{i-1}_{\substack{l=0 \\  l+i \; \text{even}}} c^j_v(t) \dfrac{\gamma_l}{\gamma_j}  (2k+1)(2l+1) \delta_{kl}
+\end{align}

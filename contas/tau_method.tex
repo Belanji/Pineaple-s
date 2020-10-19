@@ -1,0 +1,227 @@
+\documentclass[amsmath,amsfonts,amssymb,superscriptaddress,showkeys,notitlepage,onecolumn]{revtex4-1}
+\usepackage[utf8]{inputenc}
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage[caption=false]{subfig}
+
+
+%Common used commands:
+
+\newcommand{\tred}[1]{ \textcolor{red}{#1} }
+\newcommand{\tblue}[1]{ \textcolor{blue}{#1} }
+
+%Common used functions:
+
+\newcommand{\dpartial}[1]{\ensuremath{\dfrac{\partial}{\partial #1}}}
+\newcommand{\ddpartial}[1]{\ensuremath{\dfrac{\partial^2}{\partial #1^2}}}
+\newcommand{\zint}[1]{ \ensuremath{  \int_{\tilde{z}=-1}^{\tilde{z}=1} #1 d\tilde{z} } }
+
+
+\newcommand{\Npm}{\ensuremath{n_{\pm}(z,t)}}
+
+
+\newcommand{\Np}{\ensuremath{n_{+}(\tilde{z},t)}}
+\newcommand{\Nm}{\ensuremath{n_{-}(\tilde{z},t)}}
+\newcommand{\V}{\ensuremath{V(\tilde{z},t)}}
+\newcommand{\legP}[1]{\ensuremath{P_{#1}(\tilde{z})}}
+
+\newcommand{\jpm}{\ensuremath{j_{\pm}(z,t)}}
+
+% Constants:
+
+\begin{document}
+\title{PiNeaple- Poisson-Nerst-Planck: spectral version.}
+
+\author{R.F. de Souza}
+
+\begin{abstract} \tred{ Nothing much abstract to to talk about.} 
+\end{abstract}
+
+\maketitle
+
+\section{Introduction:}
+
+
+
+\section{Tau method:}
+
+\subsection{Equations:}
+\begin{equation}
+  \dfrac{\partial}{\partial t}\Npm= -\dpartial{z} \jpm
+\end{equation}
+with
+\begin{equation}\label{eq:StrongFlux}
+  j_{\pm}(z,t)=-D_{\pm}\left[\dpartial{z} \Npm \pm \dfrac{q}{k_B T} \Npm \dpartial{z} V(z,t) \right] 
+\end{equation}
+and $-d \leq z \leq d$.
+
+  \renewcommand{\Npm}{\ensuremath{n_{\pm}(\tilde{z},t)}}
+  \renewcommand{\jpm}{\ensuremath{j_{\pm}(\tilde{z},t)}}
+
+  
+  Substituting $\tilde{z}=z/d$:
+  \begin{equation}\label{eq:StrongPotential}
+  \dfrac{\partial}{\partial t}\Npm= -\dpartial{\tilde{z}} \jpm
+\end{equation}
+and  
+\begin{equation}
+  \jpm=-\tilde{D}_\pm\left[\dpartial{\tilde{z}}\Npm \pm \dfrac{q}{k_B T d^2} \Npm \dpartial{\tilde{z}} V(\tilde{z},t) \right]
+\end{equation}
+with $\tilde{D}_\pm =D_\pm/d^2$ and $-1\leq z \leq 1$.
+
+The potential $V(\tilde{z},t)$ obeys the equation:
+\begin{equation}
+  \ddpartial{\tilde{z}} V(\tilde{z},t) =-\dfrac{q d^2}{\epsilon}(\Np-\Nm)
+\end{equation}
+with
+\begin{equation}
+  V\left(\pm 1 ,t \right)=\pm \dfrac{V_0}{2} \text{exp}(I \omega t)
+\end{equation}
+
+\subsection{Weighted residuals}
+
+We are going to develop the functions $\Np$, $\Nm$ and $\V$ in terms o Legendre polynomials as following:
+
+\begin{align}\nonumber
+  \Np&=\sum_{i=0}^N  c^j_{+}(t) \legP{i}\\
+  \Nm&=\sum_{i=0}^N  c^j_{-}(t) \legP{i}\\ \nonumber
+  \V&=\sum_{i=0}^N   c^j_{v}(t) \legP{i}
+\end{align}
+
+
+Knowing that:
+\begin{align}\nonumber
+  \dpartial{\tilde{z}} \legP{i}&=\sum_{\substack{j=0 \\  j+i \; \text{odd}}}^{i-1} (2j+1) \legP{j}, \quad \text{and}\\
+  \ddpartial{\tilde{z}} \legP{i}&=\sum_{\substack{j=0 \\  i+j \; \text{even}}}^{i-2} \left(j+\dfrac{1}{2} \right) \left(i(i+1)-j(j+1) \right) \legP{j},
+\end{align}
+we can write:
+\begin{align}\label{eq:ddV}\nonumber
+  \dpartial{z} \V&=\sum_{i=0}^{N} \sum_{\substack{j=0 \\  i+j \; \text{odd}}}^{i-1} (2j+1) {c^i}_v(t) \legP{j},\\
+\ddpartial{z}  V&=\sum_{i=0}^{N} \sum_{\substack{j=0 \\  j+i \; \text{even}}}^{i-2} {c^i}_v(t) \left(j+\dfrac{1}{2} \right) \left(i(i+1)-j(j+1) \right)  \legP{j}
+\end{align}
+
+
+Writing the equations \eqref{eq:StrongFlux} and \eqref{eq:StrongPotential} as a residual:
+\begin{align}\label{eq:Residual}\nonumber
+  R_{\pm}(\tilde{z},t)&= \dpartial{t} \Npm + \dpartial{\tilde{z}} \jpm\\
+  R_{V}(\tilde{z},t)&= \ddpartial{z}  \V + \dfrac{q d^2}{\epsilon}(\Np-\Nm).
+\end{align}
+
+We will multiply the residuals by $P_i(\tilde{z})$ and integrate from $\tilde{z}=-1$ to $\tilde{z}=1$:
+\begin{align}\nonumber \label{eq:residuals}
+  \int_{\tilde{z}=-1}^{\tilde{z}=1} R_{\pm}(\tilde{z},t) P_k(\tilde{z}) d\tilde{z}&= 0\\
+  \int_{\tilde{z}=-1}^{\tilde{z}=1} R_{V}(\tilde{z},t) P_k(\tilde{z}) d\tilde{z} &= 0
+\end{align}
+Taking $i=0,\ldots,N$ give us $3N+3$ equations for $3N+3$ variables.
+
+
+\subsection{Manipulating Residuals equations:}
+
+\subsubsection{Eletric potential equation.}
+
+Expanding the eletric potential equation\eqref{eq:residuals}:
+\begin{equation}\label{eq:vResiduals}
+  \zint{ \ddpartial{z}  \V P_k(\tilde{z}) }+ \zint{ \dfrac{q d^2}{\epsilon}\left[\Np-\Nm \right] P_k(\tilde{z}) } =0 \quad \forall \quad i=0, \cdots, N-2
+\end{equation}
+
+
+Substituting \eqref{eq:ddV} into \eqref{eq:vResiduals}:
+\begin{align}
+  \zint{ \sum_{i=0}^{N} \sum_{\substack{j=0 \\  j+i \; \text{even}}}^{i-2}
+  \left(j+\dfrac{1}{2} \right) \left(i(i+1)-j(j+1) \right) {c^i}(t)  \legP{j}
+      P_k(\tilde{z})} 
+  +\zint{ \dfrac{q d^2}{\epsilon} \sum_{i=0}^{N} [c^j_{+}(t)  - c^j_{-}(t)] P_k(\tilde{z}) P_i(\tilde{z}) } =0
+\end{align}
+for all $i=0,1,\cdots,N-2$.
+
+
+The r.h.s can be simplified to:
+\begin{align}\nonumber
+  \zint{ \dfrac{q d^2}{\epsilon} \sum_{i=0}^{N} [c^i_{+}(t)  - c^i_{-}(t)] P_k(\tilde{z}) P_i(\tilde{z}) }&=-\dfrac{q d^2}{\epsilon} \sum_{i=0}^{N} [c^i_{+}(t)  - c^i_{-}(t)] \delta_{ik}\\
+  &=\dfrac{q d^2}{\epsilon}  [c^k_{+}(t)  - c^k_{-}(t)]
+\end{align}
+
+The L.h.s:
+\begin{align}\nonumber
+  \zint{ \sum_{i=0}^{N} \sum_{\substack{j=0 \\  j+i \; \text{even}}}^{i-2}
+  \left(j+\dfrac{1}{2} \right) \left(i(i+1)-j(j+1) \right) {c^i}(t)  \legP{j}
+      P_k(\tilde{z})}  \\ \nonumber
+  = \sum_{i=0}^{N} \sum_{\substack{j=0 \\  j+i \; \text{even}}}^{i-2}
+  \left(j+\dfrac{1}{2} \right) \left[i(i+1)-j(j+1) \right] {c^i}(t)\gamma_k \delta_{jk}
+\end{align}
+
+Therefore we have:
+\begin{align}
+\sum_{i=0}^{N} \sum_{\substack{j=0 \\  j+i \; \text{even}}}^{i-2}
+  \left(j+\dfrac{1}{2} \right) \left[i(i+1)-j(j+1) \right] {c^i}(t)\gamma_k \delta_{jk}=-\dfrac{q d^2}{\epsilon}  [c^k_{+}(t)  - c^k_{-}(t)] \quad \forall \quad k=0,\cdots, N-2.
+\end{align}
+
+The boundary conditions are:
+\begin{equation}\label{eq:expandedVboundaries}
+ \sum_{i=0}^N {c^i_{v}(t)} P_i(\pm 1)=\pm \dfrac{V_0}{2} \text{exp}(I \omega t).
+\end{equation}
+
+Knowing that $P_i(\pm 1)=(\pm 1)^i$, we can divide \eqref{eq:expandedVboundaries} into:
+\begin{align}\nonumber
+  \sum_{i=0}^N {c^i_{v}(t)}= \dfrac{V_0}{2} \text{exp}(I \omega t),\\
+  \sum_{i=0}^N (-1)^i {c^i_{v}(t)}= -\dfrac{V_0}{2} \text{exp}(I \omega t).\\
+\end{align}
+
+\subsubsection{Concentration equations:}
+
+
+Writing the equations \eqref{eq:StrongFlux} and \eqref{eq:StrongPotential} as a residual:
+\begin{align}\label{eq:Residual}\nonumber
+  R_{\pm}(\tilde{z},t)&= \dpartial{t} \Npm+\tilde{D}_\pm \dpartial{\tilde{z}}\left[\dpartial{\tilde{z}}\Npm \pm \dfrac{q}{k_B T d^2} \Npm \dpartial{\tilde{z}} V(\tilde{z},t) \right]\\
+  &=\dpartial{t} \Npm+\tilde{D}_\pm\left\lbrace\ddpartial{\tilde{z}}\Npm \pm \dfrac{q}{k_B T d^2} \left[\dpartial{\tilde{z}} \Npm \dpartial{\tilde{z}} V(\tilde{z},t) + \Npm \ddpartial{\tilde{z}} V(\tilde{z},t)\right] \right\rbrace
+\end{align}
+
+\begin{align}\label{eq:Residual}\nonumber
+\zint{ \dpartial{t} \Npm P_i(\tilde{z})}+ \zint{ \tilde{D}_\pm\left\lbrace\ddpartial{\tilde{z}}\Npm \pm \dfrac{q}{k_B T d^2} \left[\dpartial{\tilde{z}} \Npm \dpartial{\tilde{z}} V(\tilde{z},t) + \Npm \ddpartial{\tilde{z}} V(\tilde{z},t)\right] \right\rbrace P_i(\tilde{z})}=0
+\end{align}
+
+Going by parts:
+\begin{equation}
+\zint{ \dpartial{t} \Npm P_k(\tilde{z}) d\tilde{z}}= \dpartial{t} c^k_{\pm}(t) 
+\end{equation}
+
+\begin{align}\nonumber
+  \zint{\tilde{D}_\pm \ddpartial{\tilde{z}} \Npm P_{k}(\tilde{z}) }&=\sum_{i=0}^{N} \sum_{\substack{j=0 \\  i+j \; \text{even}}}^{i-2} \zint{
+  \left(j+\dfrac{1}{2} \right) \left(i(i+1)-j(j+1) \right)
+  {c^i}_{\pm}(t)  P_j(\tilde{z}) P_k(\tilde{z}) },\\
+  &=\sum_{i=0}^{N} \sum_{\substack{j=0 \\  i+j \; \text{even}}}^{i-2}   \left(j+\dfrac{1}{2} \right) \left(i(i+1)-j(j+1) \right)
+  {c^i}_{\pm}(t) \gamma_k \delta_{jk}
+\end{align}
+
+\begin{equation}
+\zint{\legP{j} \legP{q}   \legP{k}  }=\sqrt{ \dfrac{(2j+1)(2k+1)}{(2q+1)}} Cg(j,k,q,0,0,0)^2
+\end{equation}
+
+
+Yet another part:
+
+
+\begin{align}\nonumber
+  \zint{ \dfrac{q}{k_B T d^2}\dpartial{\tilde{z}} \Npm \dpartial{\tilde{z}} V(\tilde{z},t) \legP{k} }=\\
+=  \dfrac{q}{k_B T d^2} \zint{ \sum_{i=0}^{N} \sum_{p=0}^{N} \sum_{\substack{j=0 \\  j+i \; \text{odd}}}^{i-1}    \sum_{\substack{q=0 \\  p+q \; \text{odd}}}^{i-1} (2j+1)(2q+1) c^i_{\pm}(t)  c^p_{v}(t) \legP{j} \legP{q}   \legP{k}  }\\
+  =
+  \dfrac{q}{k_B T d^2}  \sum_{i=0}^{N} \sum_{p=0}^{N} \sum_{\substack{j=0 \\  j+i \; \text{odd}}}^{i-1}    \sum_{\substack{q=0 \\  p+q \; \text{odd}}}^{i-1} (2j+1)(2q+1) c^i_{\pm}(t)  c^p_{v}(t) \sqrt{ \dfrac{(2j+1)(2k+1)}{(2q+1)}} Cg(j,k,q,0,0,0)^2
+\end{align}
+
+And the final part:
+\begin{align}\nonumber
+  \zint{\dfrac{D q}{k_B T d^2}  \Npm \ddpartial{\tilde{z}} V(\tilde{z},t)}=\\\nonumber
+  =  \sum_{i=0}^{N} \sum_{p=0}^{N}  \sum_{\substack{q=0 \\  p+q \; \text{even}}}^{i-2} \zint{ \dfrac{D q}{k_B T d^2}      c^i_{\pm}(t)  c^p_{v}(t)  \left(q+\dfrac{1}{2} \right) \left[p(p+1)-q(q+1) \right] \legP{i} \legP{q} \legP{k}}\\
+  \sum_{i=0}^{N} \sum_{p=0}^{N}  \sum_{\substack{q=0 \\  p+q \; \text{even}}}^{i-2}  \dfrac{D q}{k_B T d^2}      c^i_{\pm}(t)  c^p_{v}(t)  \left(q+\dfrac{1}{2} \right) \left[p(p+1)-q(q+1) \right] \sqrt{ \dfrac{(2i+1)(2k+1)}{(2q+1)}} Cg(i,k,q,0,0,0)^2
+\end{align}
+
+\end{document}
+
+
+
+
+
+
