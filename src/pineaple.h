@@ -33,6 +33,7 @@ struct PNP_constants{
   double epsilon;
   double V0;
   double omega;
+  double Dc;
   int l1max;
   
 };
@@ -46,7 +47,7 @@ PetscErrorCode  fill_Vp_rhs(Vec Vp_rhs,
                  double  time);
   
 void fill_Vp_Matrix(Mat Vp_matrix, 
-		    Vec Vp,
-		    Vec Npm,                 
-		    struct PNP_constants constants,
-		    double  time);
+		    const Vec Vp,
+		    const Vec Npm,                 
+		    const struct PNP_constants constants,
+		    const double  time);

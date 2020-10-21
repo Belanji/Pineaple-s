@@ -15,10 +15,8 @@ int main(int argc, char *argv[])
 
 
   PetscErrorCode ierr;
-  PetscScalar *NpmV_it;
   Vec  Npm, Vp, Vp_rhs;
-
-  Mat Vp_mat;
+  Mat Vp_mat, Npm_jac;
 
    
   
@@ -38,12 +36,13 @@ int main(int argc, char *argv[])
   constants.epsilon=1.;
   constants.V0=2.;
   constants.omega=1.;
+  constants.Dc=1;
 
-  
-  l1max=10;
+  constants.l1max=10;
+  l1max=constants.l1max;
   l2max=l1max;
 
-  constants.l1max=l1max;
+  
   
   //Setting up the Matrixes and vectors:
 
@@ -73,15 +72,8 @@ int main(int argc, char *argv[])
 
 
   MatCreateSeqDense(PETSC_COMM_SELF,l1max+1 , l1max+1, NULL, &Vp_mat );
-  //MatCreateSeqAIJ(PETSC_COMM_SELF,l1max+1 , l1max+1, l1max+1 , NULL, &Vp_mat );
   MatSetUp(Vp_mat);
   
-  
-
-  //Np=calloc(l1max+1, sizeof(double _Complex) );
-  //Nm=calloc(l1max+1, sizeof(double _Complex) );  
-
-
   
   //Setting up rhs vectors:
   
@@ -91,10 +83,6 @@ int main(int argc, char *argv[])
   //Sertting up coefficients Matrixes:
 
   fill_cg(l1max,l2max,cg);
-  //Vp_mat=calloc( (l1max+1)*(l1max+1) , sizeof(double _Complex));
-  //Npm_jac=calloc( (l1max+1)*(l1max+1) , sizeof(double _Complex));
-
-
 
   //Setting up initial consitions:
 
@@ -111,19 +99,16 @@ int main(int argc, char *argv[])
   KSPSetOperators(solver,Vp_mat,Vp_mat);
   KSPSolve(solver, Vp_rhs ,Vp);
 
-
-  const PetscScalar * Vp_it;
-  VecGetArrayRead(Vp, & Vp_it);
   
 };
 
 
 
 void fill_Vp_Matrix(Mat Vp_mat, 
-		    Vec Vp,
-		    Vec Npm,                 
+		    const Vec Vp,
+		    const Vec Npm,                 
 		    struct PNP_constants constants,
-		    double  time)
+		    const double  time)
 
 {
 
@@ -177,10 +162,10 @@ void fill_Vp_Matrix(Mat Vp_mat,
 
 
 PetscErrorCode fill_Vp_rhs(Vec Vp_rhs, 
-                 Vec Vp,
-                 Vec Npm,
-                 struct PNP_constants constants,
-                 double  time)
+                 const Vec Vp,
+                 const Vec Npm,
+                 const struct PNP_constants constants,
+                 const double  time)
 
 {
 
