@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
 
   PetscErrorCode ierr;
-  Vec  Npm, Vp, Vp_rhs;
+  Vec  Npm, Vp, Npm_rhs, Vp_rhs;
   Mat Vp_mat, Npm_jac;
 
    
@@ -37,7 +37,8 @@ int main(int argc, char *argv[])
   constants.V0=2.;
   constants.omega=1.;
   constants.Dc=1;
-
+  constants.N0=1;
+  
   constants.l1max=10;
   l1max=constants.l1max;
   l2max=l1max;
@@ -50,14 +51,15 @@ int main(int argc, char *argv[])
   VecCreate( PETSC_COMM_SELF , &Npm  );
   VecSetSizes(Npm, PETSC_DECIDE, 2*(l1max+1)+4);
   VecSetType(Npm, VECSEQ  );
-
+  VecDuplicate(Npm, &Npm_rhs);
+  
   //Important Note: The vector is organized as follows:
   //Npm[0]=sigma_p (lower bound)
   //Npm[1:(l1max+1)]= positive charge density
-  //Npm[l1max+2]=sigma_p (upper bound)
+  //Npm[(l1max+1)+1]=sigma_p (upper bound)
 
-  //Npm[(l1max+3)]=sigma_m (lower bound)
-  //Npm[(l1max+3):(2*l1max+4)]= negative charge density
+  //Npm[(l1max+1)+2]=sigma_m (lower bound)
+  //Npm[(l1max+4):(2*l1max+4)]= negative charge density
   //Npm[l1max+5]=sigma_m (upper bound)
 
 
@@ -86,8 +88,10 @@ int main(int argc, char *argv[])
 
   //Setting up initial consitions:
 
-  VecSet(Npm,0);
+  
   VecSet(Vp,0);
+
+  
   
   fill_Vp_rhs(Vp_rhs, Vp,Npm, constants, time);
   fill_Vp_Matrix(Vp_mat, Vp, Npm, constants, time);
@@ -99,10 +103,32 @@ int main(int argc, char *argv[])
   KSPSetOperators(solver,Vp_mat,Vp_mat);
   KSPSolve(solver, Vp_rhs ,Vp);
 
+
+  homogeneous_ic(Npm, constants);
+
+  fill_Npm_rhs(Npm_rhs, Vp, Npm,constants,time);
   
 };
 
 
+void homogeneous_ic(Vec Npm,
+		    struct PNP_constants constants)
+{
+
+  PetscInt l1max=constants.l1max;
+  
+  PetscInt ip=1;
+  PetscInt in=l1max+4;
+
+
+  PetscScalar N0=constants.N0;
+  
+  VecSet(Npm,0);
+
+  VecSetValues(Npm,1,&ip,&N0,ADD_VALUES);
+  VecSetValues(Npm,1,&in,&N0,ADD_VALUES);
+
+}
 
 void fill_Vp_Matrix(Mat Vp_mat, 
 		    const Vec Vp,
@@ -159,6 +185,48 @@ void fill_Vp_Matrix(Mat Vp_mat,
   MatAssemblyEnd(Vp_mat,MAT_FINAL_ASSEMBLY);
   
 };
+
+
+PetscErrorCode fill_Npm_rhs(Vec Npm_rhs, 
+                 const Vec Vp_inp,
+                 const Vec Npm_inp,
+                 const struct PNP_constants constants,
+                 const double  time)
+{
+
+  PetscInt ii,ip, im;  
+  const PetscScalar *Np, *Nm, *Vp;
+  PetscScalar * rhs;
+  PetscErrorCode ierr;
+
+
+  const PetscInt l1max=constants.l1max;
+  const double omega=constants.omega;
+  const double V0=constants.V0;
+  const double qd2_epsi=constants.q*constants.d*constants.d/constants.epsilon;
+
+  const double Dc= constants.Dc;
+
+
+
+  VecGetArrayRead(Npm_inp, & Np);
+  VecGetArrayRead(Vp_inp, & Vp);
+  VecGetArray(Npm_rhs, & rhs);
+
+
+  Nm=&Np[l1max+3];
+
+  printf("Np=%lf\n",Np[1]);
+  printf("Nm=%lf\n",Nm[1]);
+
+  VecRestoreArray(Npm_rhs, & rhs);
+  VecRestoreArrayRead(Vp_inp, & Vp);
+  VecRestoreArrayRead(Npm_inp, & Np);
+  
+  
+
+}
+
 
 
 PetscErrorCode fill_Vp_rhs(Vec Vp_rhs, 

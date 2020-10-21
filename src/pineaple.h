@@ -34,7 +34,10 @@ struct PNP_constants{
   double V0;
   double omega;
   double Dc;
+  double N0;
+
   int l1max;
+  
   
 };
 
@@ -51,3 +54,12 @@ void fill_Vp_Matrix(Mat Vp_matrix,
 		    const Vec Npm,                 
 		    const struct PNP_constants constants,
 		    const double  time);
+
+PetscErrorCode fill_Npm_rhs(Vec Npm_rhs, 
+			    const Vec Vp_inp,
+			    const Vec Npm_inp,
+			    const struct PNP_constants constants,
+			    const double  time);
+
+void homogeneous_ic(Vec Npm,
+		    struct PNP_constants constants);
