@@ -40,6 +40,7 @@ struct PNP_constants{
   double tau1;
   double tau2;
   double dt;
+  FILE *surface_charge;
   
   int l1max;
   
@@ -88,4 +89,18 @@ PetscErrorCode evolve(Vec Npm,
 		      Mat Vp_mat,
 		      Mat Npm_jac,
 		      const struct PNP_constants constants,
-		      double  time);
+		      double  time,
+		      double tf);
+
+
+PetscErrorCode Print_Charge_Density(Vec Npm,
+				    const struct PNP_constants constants,
+				    double time,
+				    int figNumber);
+
+double legendreP(double x,
+		 int ii);
+
+void print_surface_charge(const Vec Npm,
+			  const struct PNP_constants constants,
+			  const double time);
