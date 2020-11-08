@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.11.1)  2 NOV 2020 11:08
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.11.1)  6 NOV 2020 19:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -498,10 +498,10 @@ Overfull \hbox (11.16206pt too wide) detected at line 196
 [3] [4]
 No file tau_method.bbl.
 [5]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 265.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 270.
  (./tau_method.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 265.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 265.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 270.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 270.
 Package rerunfilecheck Info: File `tau_method.out' has not changed.
 (rerunfilecheck)             Checksum: 6BE76BD92A5AE638FABD300641C9C62A;661.
 
@@ -510,9 +510,9 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 9128 strings out of 483107
- 133450 string characters out of 5964630
- 429789 words of memory out of 5000000
+ 9130 strings out of 483107
+ 133476 string characters out of 5964630
+ 428789 words of memory out of 5000000
  23954 multiletter control sequences out of 15000+600000
  538351 words of font info for 46 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
@@ -528,10 +528,10 @@ blic/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
 fonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti
 9.pfb>
-Output written on tau_method.pdf (5 pages, 138965 bytes).
+Output written on tau_method.pdf (5 pages, 139406 bytes).
 PDF statistics:
- 169 PDF objects out of 1000 (max. 8388607)
- 149 compressed objects within 2 object streams
- 51 named destinations out of 1000 (max. 500000)
+ 171 PDF objects out of 1000 (max. 8388607)
+ 151 compressed objects within 2 object streams
+ 53 named destinations out of 1000 (max. 500000)
  81 words of extra memory for PDF output out of 10000 (max. 10000000)
 

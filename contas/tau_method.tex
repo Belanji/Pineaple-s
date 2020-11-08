@@ -209,7 +209,7 @@ Going by parts:
 \end{align}
 
 \begin{equation}
-\zint{\legP{j} \legP{q}   \legP{k}  }=\sqrt{ \dfrac{(2j+1)(2k+1)}{(2q+1)}} Cg(j,k,q,0,0,0)^2
+\zint{\legP{k} \legP{j}   \legP{i}  }= \dfrac{2}{2k+1} Cg(i,j,k,0,0,0)^2
 \end{equation}
 
 
@@ -220,14 +220,14 @@ Yet another part:
   \zint{ \dfrac{q}{k_B T d^2}\dpartial{\tilde{z}} \Npm \dpartial{\tilde{z}} V(\tilde{z},t) \legP{k} }=\\
 =  \dfrac{q}{k_B T d^2} \zint{ \sum_{i=0}^{N} \sum_{p=0}^{N} \sum_{\substack{j=0 \\  j+i \; \text{odd}}}^{i-1}    \sum_{\substack{q=0 \\  p+q \; \text{odd}}}^{i-1} (2j+1)(2q+1) c^i_{\pm}(t)  c^p_{v}(t) \legP{j} \legP{q}   \legP{k}  }\\
   =
-  \dfrac{q}{k_B T d^2}  \sum_{i=0}^{N} \sum_{p=0}^{N} \sum_{\substack{j=0 \\  j+i \; \text{odd}}}^{i-1}    \sum_{\substack{q=0 \\  p+q \; \text{odd}}}^{i-1} (2j+1)(2q+1) c^i_{\pm}(t)  c^p_{v}(t) \sqrt{ \dfrac{(2j+1)(2k+1)}{(2q+1)}} Cg(j,k,q,0,0,0)^2
+  \dfrac{q}{k_B T d^2}  \sum_{i=0}^{N} \sum_{p=0}^{N} \sum_{\substack{j=0 \\  j+i \; \text{odd}}}^{i-1}    \sum_{\substack{q=0 \\  p+q \; \text{odd}}}^{i-1} 2(2j+1) c^i_{\pm}(t)  c^p_{v}(t) Cg(j,k,q,0,0,0)^2
 \end{align}
 
 And the final part:
 \begin{align}\nonumber
-  \zint{\dfrac{D q}{k_B T d^2}  \Npm \ddpartial{\tilde{z}} V(\tilde{z},t)}=\\\nonumber
+  \zint{\dfrac{D q}{k_B T d^2}  \Npm \ddpartial{\tilde{z}} V(\tilde{z},t)}&=\\\nonumber
   =  \sum_{i=0}^{N} \sum_{p=0}^{N}  \sum_{\substack{q=0 \\  p+q \; \text{even}}}^{i-2} \zint{ \dfrac{D q}{k_B T d^2}      c^i_{\pm}(t)  c^p_{v}(t)  \left(q+\dfrac{1}{2} \right) \left[p(p+1)-q(q+1) \right] \legP{i} \legP{q} \legP{k}}\\
-  \sum_{i=0}^{N} \sum_{p=0}^{N}  \sum_{\substack{q=0 \\  p+q \; \text{even}}}^{i-2}  \dfrac{D q}{k_B T d^2}      c^i_{\pm}(t)  c^p_{v}(t)  \left(q+\dfrac{1}{2} \right) \left[p(p+1)-q(q+1) \right] \sqrt{ \dfrac{(2i+1)(2k+1)}{(2q+1)}} Cg(i,k,q,0,0,0)^2
+  =\sum_{i=0}^{N} \sum_{p=0}^{N}  \sum_{\substack{q=0 \\  p+q \; \text{even}}}^{i-2}  \dfrac{D q}{k_B T d^2}      c^i_{\pm}(t)  c^p_{v}(t)  \dfrac{2 \left(q+\dfrac{1}{2} \right) \left[p(p+1)-q(q+1) \right]}{2q+1}  Cg(i,k,q,0,0,0)^2
 \end{align}
 
 Here goes the boundary conditions:
@@ -237,13 +237,18 @@ Here goes the boundary conditions:
 \end{align}
 
 Knowing that
-\begin{equation}
-  \dpartial{\tilde{z}}P_{i}(\tilde{z}=\pm 1)=\dfrac{1}{2} (\pm 1)^{(i-1)} i (i+1),
-\end{equation}
-we have
 \begin{align}
-  \sum^N_{i=0} \left[-\tilde{D}_\pm \dfrac{1}{2} (-1)^{(i-1)} i (i+1) c^i_{\pm}(t) +(-1)^{i} \kappa_1 c^i_{\pm}(t) \right]-\dfrac{1}{\tau_1}\sigma_{1,\pm}=0\\
-  \sum^N_{i=0} \left[-\tilde{D}_\pm \dfrac{1}{2}  i (i+1) c^i_{\pm}(t)- \kappa_2 c^i_{\pm}(t) \right]+\dfrac{1}{\tau_2}\sigma_{2,\pm}=0
+  P_{i}(\tilde{z}=\pm 1)&=(\pm 1)^i\\
+  \dpartial{\tilde{z}}P_{i}(\tilde{z}=\pm 1)&=\dfrac{1}{2} (\pm 1)^{(i-1)} i (i+1),
+\end{align}
+we have
+\begin{equation}
+  \dfrac{\partial}{\partial \tilde{z}} V(\tilde{z}=\pm 1,t)=\sum_{i=0}^{N} \dfrac{1}{2} (\pm 1)^{i-1} i(i+1) c_{v}^i(t) 
+\end{equation}
+
+\begin{align}
+  \sum^N_{i=0} \left[-\tilde{D}_\pm \dfrac{1}{2} (-1)^{(i-1)} i (i+1) +(-1)^{i} (\kappa_1 \mp \dfrac{q}{k_B T d^2} \dfrac{\partial}{\partial \tilde{z}} V(\tilde{z}=- 1,t) )\right]c^i_{\pm}(t) - \dfrac{1}{\tau_1}\sigma_{1,\pm}=0\\
+  \sum^N_{i=0} \left[-\tilde{D}_\pm \dfrac{1}{2}  i (i+1) \mp \dfrac{q}{k_B T d^2} \dfrac{\partial}{\partial \tilde{z}} V(\tilde{z}=- 1,t)- \kappa_2  \right] c^i_{\pm}(t) +\dfrac{1}{\tau_2}\sigma_{2,\pm}=0
 \end{align}
 
 \subsubsection{Sigma equations:}

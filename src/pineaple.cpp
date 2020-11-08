@@ -7,6 +7,8 @@
 #include "cg.h"
 #include "pineaple.h"
 
+double *cg;
+
 
 char help[]="Drink water!!!";
 
@@ -19,25 +21,31 @@ int main(int argc, char *argv[])
   Vec  Npm, Vp, Npm_rhs, Vp_rhs;
   Mat Vp_mat, Npm_jac;
 
-   
+
+  PetscInt l1max;
+  PetscInt l3min,l3max,l2max;
+
+  l1max=30;
+  PetscInt ln=1;
+  //PetscInt l1=;
+  PetscInt l1[ln]={4};
   
-  double *cg;
+  
+  double dt=0.0005;
   double time=0.0;
+  double tf=0.2;
+  double timePrint=tf;
+
   
-  PetscInt l1max,l2max;
-  PetscInt l3min,l3max;
-  PetscInt l1,l2,l3;
-  double timePrint=1.00;
-  double tf=1.00;
   
   struct PNP_constants  constants;
 
   ierr = PetscInitialize(&argc,& argv,(char*)0,help);
-  
+
+  constants.V0=1.0;
   constants.q=1.;
   constants.d=1;
   constants.epsilon=1.;
-  constants.V0=2.;
   constants.omega=1.;
   constants.Dc=1;
   constants.N0=1;
@@ -47,10 +55,9 @@ int main(int argc, char *argv[])
 
   constants.kappa1=1.;
   constants.kappa2=1.;
-  constants.dt=0.005;
+  constants.dt=dt;
   
-  constants.l1max=120;
-  l1max=constants.l1max;
+  constants.l1max=l1max;
   l2max=l1max;
 
 
@@ -103,30 +110,23 @@ int main(int argc, char *argv[])
   fill_cg(l1max,l2max,cg);
 
   //Setting up initial consitions:
-  
-  VecSet(Vp,0);
+  PetscScalar V0=constants.V0;
 
-  
-  
-  //fill_Vp_rhs(Vp_rhs, Vp,Npm, constants, time);
-  fill_Vp_Matrix(Vp_mat, Vp, Npm, constants, time);
+  //VecSetValues(Vp,1,&l1,&V0,ADD_VALUES);
+  for(int ii=0; ii<ln;ii++) VecSetValues(Vp,1,&l1[ii],&V0,ADD_VALUES);
 
 
-  KSP  solver;
-
-  KSPCreate(PETSC_COMM_SELF,&solver);
-  KSPSetOperators(solver,Vp_mat,Vp_mat);
-  KSPSolve(solver, Vp_rhs ,Vp);
-
-
+  //VecSet(Vp,V0);
   homogeneous_ic(Npm, constants);
-  print_surface_charge(Npm, constants, time);
+
   
+  print_surface_charge(Npm, constants, time);
+  Print_Charge_Density(Npm,Vp,constants,time,0);
 
   evolve(Npm, Vp, Npm_rhs, Vp_rhs, Vp_mat, Npm_jac, constants,time,time+timePrint);
 
 
-  Print_Charge_Density(Npm,constants,time,1);
+  Print_Charge_Density(Npm,Vp,constants,time,1);
 
   fclose(constants.surface_charge);
   return ierr;
@@ -140,6 +140,7 @@ int main(int argc, char *argv[])
 //
 //}
 PetscErrorCode Print_Charge_Density(const Vec Npm,
+				    const Vec Vp_inp,
 				    const struct PNP_constants constants,
 				    double time,
 				    int figNumber)
@@ -151,21 +152,26 @@ PetscErrorCode Print_Charge_Density(const Vec Npm,
   PetscInt l1max=constants.l1max;
   double dx=2./l1max;
   double xx;
-  double fp_value,fm_value;
-  const PetscScalar *Np;
+  double fp_value,fm_value, fvr_value,fvi_value;
+  const PetscScalar *Np, *Vp;
   FILE * snapshot;
-  char fig_name[100]="np_char_1.dat";
+  char fig_name[100];
+
+  sprintf(fig_name,"charge_v_%d.dat",figNumber);
   
   snapshot=fopen( fig_name, "w" );
-  fprintf(snapshot,"x   np   nm\n");
+  fprintf(snapshot,"   x     np   nm    real[V]  imag[V]\n");
 
   
   VecGetArrayRead(Npm, & Np);
+  VecGetArrayRead(Vp_inp, & Vp);
   
   for(ii=0; ii<=l1max; ii++)
     {
       fp_value=0;
       fm_value=0;
+      fvr_value=0;
+      fvi_value=0;
       
       xx=-1.+dx*ii;
       
@@ -176,10 +182,12 @@ PetscErrorCode Print_Charge_Density(const Vec Npm,
 	  
 	  fp_value+=real(Np[jp])*gsl_sf_legendre_Pl(jj,xx);
 	  fm_value+=real(Np[jm])*gsl_sf_legendre_Pl(jj,xx);
+	  fvr_value+=real(Vp[jj])*gsl_sf_legendre_Pl(jj,xx);
+	  fvi_value+=imag(Vp[jj])*gsl_sf_legendre_Pl(jj,xx);
 	  
 	}
 
-      fprintf(snapshot,"%.3lf %.3lf %.3lf\n",xx,fp_value,fm_value);
+      fprintf(snapshot,"%.3lf %.3lf %.3lf %.3lf %.3lf\n",xx,fp_value,fm_value,fvr_value, fvi_value);
       
     }
 
@@ -279,11 +287,12 @@ PetscErrorCode fill_Npm_Matrix(Mat Npm_mat,
 
   PetscInt ii,ip, im;
   PetscInt jj,jp, jm;
-  PetscInt kk,kp, km;  
+  PetscInt kk,kp, km;
+  PetscInt pp,qq;
   const PetscScalar *Np, *Nm, *Vp;
   PetscErrorCode ierr;
   PetscScalar rhs;
-  
+  //double *cg=
 
   const PetscInt l1max=constants.l1max;
   const double omega=constants.omega;
@@ -312,21 +321,17 @@ PetscErrorCode fill_Npm_Matrix(Mat Npm_mat,
 
       ip=ii+1;
       im=ii+(l1max+4);
-	
-      
-      for(jj=0; jj<=ii-2; jj++)
+
+      for(kk=0;kk<l1max-1;kk++)
 	{
+	  
+	  kp=kk+1;
+	  km=kk+(l1max+4);
 
-	  jp=jj+1;
-	  jm=jj+(l1max+4);
-
-	  for(kk=0;kk<l1max-1;kk++)
+	  //Difussion term:
+	  for(jj=0; jj<=ii-2; jj++)
 	    {
-
-	      kp=kk+1;
-	      km=kk+(l1max+4);
-
-
+	  
 	      if ( jj==kk && (ii+jj)%2==0)
 		{
 		  
@@ -334,9 +339,65 @@ PetscErrorCode fill_Npm_Matrix(Mat Npm_mat,
 		  MatSetValues(Npm_mat,1,&kp,1,&ip,&rhs,ADD_VALUES);
 		  MatSetValues(Npm_mat,1,&km,1,&im,&rhs,ADD_VALUES);
 		}
+
+	    }
+
+	  //First Derivative terms:
+	  for(jj=0; jj<=ii-1; jj++)
+	    {
+
+	      for(pp=0; pp<=l1max; pp++)
+		{
+		  for(qq=0; qq<=pp-1; qq++)
+		    {
+
+		      if( (ii+jj)%2==1 && (pp+qq)%2==1 )
+			{
+			  
+			  rhs=qd2_epsi*2.*(2*jj+1)*Vp[pp]*clebsch_gordan(jj,kk,qq,0,0)*clebsch_gordan(jj,kk,qq,0,0);
+
+			  MatSetValues(Npm_mat,1,&kp,1,&ip,&rhs,ADD_VALUES);
+
+			  rhs=-rhs;
+			  MatSetValues(Npm_mat,1,&km,1,&im,&rhs,ADD_VALUES);
+
+			  
+			}
+
+		      
+		    }
+		    
+		}
 	      
 	    }
 
+	  //Second Derivative terms:
+	  for(pp=0; pp<=l1max; pp++)
+	    {
+	      for(qq=0; qq<=pp-2; qq++)
+		{
+
+		  if( (pp+qq)%2==0 )
+		    {
+			  
+		      rhs=qd2_epsi*( pp*(pp+1)-qq*(qq+1) )*Vp[pp]*clebsch_gordan(ii,kk,qq,0,0)*clebsch_gordan(ii,kk,qq,0,0);
+
+		      MatSetValues(Npm_mat,1,&kp,1,&ip,&rhs,ADD_VALUES);
+
+		      rhs=-rhs;
+		      MatSetValues(Npm_mat,1,&km,1,&im,&rhs,ADD_VALUES);
+
+			  
+		    }
+
+		      
+		}
+		    
+	    }
+
+
+
+	  
 	}
 
     }
@@ -648,9 +709,15 @@ PetscErrorCode Enforce_Boundary_Conditions(Mat Npm_mat,
   const double kappa1=constants.kappa1;
   const double kappa2=constants.kappa2;
 
+  PetscScalar E_lower=0.;
+  PetscScalar E_upper=0.;
+
   
   VecGetArrayRead(Npm_inp, & Np);
   VecGetArrayRead(Vp_inp, & Vp);
+
+  for(ii=0; ii<=l1max;ii++) E_lower+=0.5*pow(-1,ii-1)*ii*(ii+1)*Vp[ii];
+  for(ii=0; ii<=l1max;ii++) E_upper+=0.5*ii*(ii+1)*Vp[ii];
 
   
 
@@ -672,12 +739,11 @@ PetscErrorCode Enforce_Boundary_Conditions(Mat Npm_mat,
       im=ii+(l1max+4);
 
       
-      rhs=-0.5*Dcd1*pow(-1,ii-1)*ii*(ii+1)+pow(-1,ii)*kappa1;
-
-      //sigma_P:
+      rhs=-0.5*Dcd1*pow(-1,ii-1)*ii*(ii+1)+pow(-1,ii)*(kappa1-qd2_epsi*E_lower);
       MatSetValues(Npm_mat,1,&kp,1,&ip,&rhs,ADD_VALUES);
 
-      //sigma_M:
+
+      rhs=-0.5*Dcd1*pow(-1,ii-1)*ii*(ii+1)+pow(-1,ii)*(kappa1+qd2_epsi*E_lower);
       MatSetValues(Npm_mat,1,&km,1,&im,&rhs,ADD_VALUES);
       
     }
@@ -700,9 +766,11 @@ PetscErrorCode Enforce_Boundary_Conditions(Mat Npm_mat,
       ip=ii+1;
       im=ii+(l1max+4);
 
-      //sigma_P:
-      rhs=-0.5*Dcd1*ii*(ii+1)-kappa2;
+      //sigma_PM Upper:
+      rhs=-0.5*Dcd1*ii*(ii+1)-qd2_epsi*E_upper-kappa2;
       MatSetValues(Npm_mat,1,&kp,1,&ip,&rhs,ADD_VALUES);
+
+      rhs=-0.5*Dcd1*ii*(ii+1)+qd2_epsi*E_upper-kappa2;
       MatSetValues(Npm_mat,1,&km,1,&im,&rhs,ADD_VALUES);
            
     }
@@ -735,14 +803,26 @@ PetscErrorCode evolve(Vec Npm,
   PetscErrorCode ierr;
   PetscScalar rhs;
   double dt=constants.dt;
-  KSP  solver;
+  KSP  solver, vp_solver;
 
+
+  //Setting up the first eletric potential:
+  
+  //fill_Vp_Matrix(Vp_mat, Vp, Npm, constants, time);
+  //fill_Vp_rhs(Vp_rhs, Vp,Npm, constants, time);
 
   
+  //KSPCreate(PETSC_COMM_SELF,&vp_solver);
+  //KSPSetOperators(vp_solver,Vp_mat,Vp_mat);
+  //KSPSolve(vp_solver, Vp_rhs ,Vp);
+
+    
   KSPCreate(PETSC_COMM_SELF,&solver);
 
   while(time<tf)
     {
+      
+
       fill_Npm_rhs( Npm_rhs, Vp, Npm, constants, time);
   
       fill_Npm_Matrix(Npm_jac, Vp, Npm, constants, time);
@@ -759,7 +839,7 @@ PetscErrorCode evolve(Vec Npm,
       MatSetValues(Npm_jac,1,&kp,1,&kp,&rhs,ADD_VALUES);
       MatSetValues(Npm_jac,1,&km,1,&km,&rhs,ADD_VALUES);
   
-      for(ii=0; ii<=l1max-1;ii++)
+      for(ii=0; ii<l1max-1;ii++)
 	{
 	  kp=ii+1;
 	  km=ii+l1max+4;
@@ -783,14 +863,18 @@ PetscErrorCode evolve(Vec Npm,
 
 
       Enforce_Boundary_Conditions(Npm_jac, Vp, Npm, constants, time);
-
+      
       //MatView(Npm_jac,	PETSC_VIEWER_STDOUT_SELF);
       //exit(0);
     
       KSPSetOperators(solver,Npm_jac,Npm_jac);
       KSPSolve(solver, Npm_rhs ,Npm);
 
-               
+
+      //KSPSetOperators(vp_solver,Vp_mat,Vp_mat);
+      //fill_Vp_rhs(Vp_rhs, Vp,Npm, constants, time);
+      //KSPSolve(vp_solver, Vp_rhs ,Vp);
+      
       time+=dt;
 
       print_surface_charge(Npm, constants, time);
@@ -817,6 +901,7 @@ void print_surface_charge(const Vec Npm_inp,
   
 
 
-  fprintf(snapshot,"%.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf\n",time,real(Npm[0]),real(Npm[l1max+2]),real(Npm[1]),total_np,real(Npm[l1max+3]),real(Npm[2*l1max+5]),real(Npm[l1max+4]),total_nm);
+  fprintf(snapshot,"%.7lf %.7lf %.3lf %.7lf %.7lf %.7lf %.7lf %.7lf %.7lf\n",time,real(Npm[0]),real(Npm[l1max+2]),real(Npm[1]),total_np,real(Npm[l1max+3]),real(Npm[2*l1max+5]),real(Npm[l1max+4]),total_nm);
+  printf("%.3lf %.3lf %.3lf %.3lf %.10lf %.3lf %.3lf %.3lf %.10lf\n",time,real(Npm[0]),real(Npm[l1max+2]),real(Npm[1]),total_np,real(Npm[l1max+3]),real(Npm[2*l1max+5]),real(Npm[l1max+4]),total_nm);
   
 }
