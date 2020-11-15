@@ -1,7 +1,7 @@
 ########### Gnu:
 COMPILER = g++
-#FLAGS=  -Ofast -fipa-pta -fopenmp
-FLAGS=  -O0 -g #-fipa-pta -fopenmp
+FLAGS=  -Ofast -fipa-pta -fopenmp
+#FLAGS=  -O0 -g #-fipa-pta -fopenmp
 LIB = -lgsl -lgslcblas -lm -lgomp -pthread
 ############ Intel:
 

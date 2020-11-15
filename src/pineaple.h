@@ -28,9 +28,11 @@ double gammaP(int ii)
 
 struct PNP_constants{
 
-  double q;
   double d;
-  double epsilon;
+  const double q=1.60217662e-19;
+  const double epsilon=6.7*8.8541878128e-12;
+  const double k_b=1.38064852e-23;
+  double T;
   double V0;
   double omega;
   double Dc;
@@ -40,15 +42,15 @@ struct PNP_constants{
   double tau1;
   double tau2;
   double dt;
-  FILE *surface_charge;
-
+  FILE *charge_adsorbed;
+  FILE *effective_adsortion;
   
   int l1max;
-  
+  double *cg;
   
 };
 
-void fill_cg(int,int,double*);
+void fill_cg(int,double*);
 
 PetscErrorCode fill_Vp_rhs(Vec Vp_rhs, 
 			   Vec Vp,
@@ -104,5 +106,6 @@ double legendreP(double x,
 		 int ii);
 
 void print_surface_charge(const Vec Npm,
+			  const Vec Vp,
 			  const struct PNP_constants constants,
 			  const double time);
